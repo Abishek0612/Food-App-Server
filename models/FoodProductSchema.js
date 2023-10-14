@@ -8,10 +8,7 @@ const FoodProductSchema = new Schema(
       required: true,
     },
 
-    quantity: {
-      type: String,
-      required: true,
-    },
+  
 
     price: {
       type: Number,
@@ -38,12 +35,17 @@ const FoodProductSchema = new Schema(
       required: true,
       default: 0,
     },
+    restaurant:{
+      type: Schema.Types.ObjectId,
+      ref: "RestaurantUser",
+      required: false
+    }
   },
   {
     timestamps: true,
   }
 );
 
-const FoodProduct = mongose.model("FoodProduct", FoodProductSchema);
+const FoodProduct = mongoose.model("FoodProduct", FoodProductSchema);
 
 export default FoodProduct;
