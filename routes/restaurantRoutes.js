@@ -8,6 +8,7 @@ import {
   createFoodproduct,
   deleteFoodItem,
   getAllFoodProduct,
+  getAllFoodProductsFromAllRestaurants,
   getFoodProduct,
   updateFoodItem,
 } from "../controllers/restaurantFoodProduct.js";
@@ -22,7 +23,11 @@ restaurantUser.post(
   restaurantOwnerIsLoggedIn,
   createFoodproduct
 );
+
 restaurantUser.get("/get/food/:id", getFoodProduct);
+
+//!get all food product getAllFoodProductsFromAllRestaurants
+restaurantUser.get("/get-all-foodproduct", getAllFoodProductsFromAllRestaurants)
 
 //!get  particular restaurant id food
 restaurantUser.get(

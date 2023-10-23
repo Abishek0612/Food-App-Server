@@ -1,0 +1,862 @@
+// import mongoose from "mongoose";
+// const Schema = mongoose.Schema;
+
+// const CustomerSchema = new Schema(
+//   {
+//     name: {
+//       type: String,
+//       required: true,
+//     },
+
+//     phoneNumber: {
+//       type: String,
+//       required: true,
+//     },
+
+//     email: {
+//       type: String,
+//       required: true,
+//     },
+
+//     password: {
+//       type: String,
+//       required: true,
+//     },
+
+//     hasShippingAddress:{
+//       type:Boolean,
+//       default: false
+//     },
+
+//     shippingAddress:{
+//       name:{
+//         type:String,
+//       },
+//       address:{
+//         type:String
+//       }
+//     }
+//   },
+//   {
+//     timestamps: true,
+//   }
+// );
+
+// const Customer = mongoose.model("CustomerUser", CustomerSchema);
+
+// export default Customer;
+// import mongoose from "mongoose";
+// const Schema = mongoose.model;
+
+// const RestaurentSchema = mongoose.Schema({
+//   restaurantName: {
+//     type: String,
+//     required: true,
+//   },
+//   email: {
+//     type: String,
+//     required: true,
+//   },
+
+//   password: {
+//     type: String,
+//     required: true,
+//   },
+
+//   address: {
+//     type: String,
+//     required: true,
+//   },
+
+//   openingTime: {
+//     type: String,
+//     required: true,
+//   },
+//   closingTime: {
+//     type: String,
+//     required: true,
+//   },
+//   role: {
+//     type: String,
+//     default: "restaurantOwner", // Set default role for restaurant owners
+//   },
+// });
+
+// const Restaurent = mongoose.model("RestaurantUser", RestaurentSchema);
+
+// export default Restaurent;
+// this is Schema                                                                                                                                                                                                import jwt from "jsonwebtoken";
+// import Restaurent from "../models/RestaurentUserSchema.js";
+
+// export const restaurantOwnerIsLoggedIn = async (req, res, next) => {
+//   const token = getTokenFromHeader(req);
+
+//   try {
+//     const decodedUser = jwt.verify(token, process.env.JWT);
+//     console.log("Decoded User:", decodedUser);
+
+//     // Verify the user's role from the decoded token
+//     if (decodedUser.role.toLowerCase() !== "restaurantowner") {
+//       throw new Error("Access denied. Only restaurant owners are allowed.");
+//     }
+
+//     // Save the user ID into req object for further processing
+//     req.user = { _id: decodedUser.restaurantId };
+//     next();
+//   } catch (error) {
+//     console.error("Middleware Error:", error);
+//     res.status(401).json({ error: error.message });
+//   }
+// };
+
+// export const getTokenFromHeader = (req) => {
+//   // Get the Authorization header
+//   const authHeader = req.headers.authorization;
+
+//   // Check if the Authorization header exists and has the correct format
+//   if (authHeader && authHeader.startsWith("Bearer ")) {
+//     // Extract the token part from the header
+//     const token = authHeader.substring(7); // Remove 'Bearer ' from the beginning
+//     console.log("Token:", token);
+//     return token;
+//   }
+
+//   // If the header is missing or has incorrect format, return null or handle the error accordingly
+//   console.log("Token not found in header");
+//   return null;
+// };
+// this is restaurant middlewear                                                                                                                                                             import jwt from "jsonwebtoken";
+// import Customer from "../models/CustomerUserSchema.js";
+
+// export const customerIsLoggedIn = async (req, res, next) => {
+//   const token = getTokenFromHeader(req);
+
+//   try {
+//     const decodedUser = jwt.verify(token, process.env.JWT);
+//     console.log("Decoded User: ", decodedUser);
+//     // Verify the user's role from the decoded token
+//     if (decodedUser.role.toLowerCase() !== "customer") {
+//       throw new Error("Access denied. Only customers are allowed.");
+//     }
+
+//     // Save the user ID into req object for further processing
+//     req.user = { _id: decodedUser.customerId };
+//     next();
+//   } catch (error) {
+//     console.error("Middlewear Error:", error);
+//     res.status(401).json({ error: error.message });
+//   }
+// };
+
+// export const getTokenFromHeader = (req) => {
+//   // Get the Authorization header
+//   const authHeader = req.headers.authorization;
+
+//   // Check if the Authorization header exists and has the correct format
+//   if (authHeader && authHeader.startsWith("Bearer ")) {
+//     // Extract the token part from the header
+//     const token = authHeader.substring(7); // Remove 'Bearer ' from the beginning
+//     console.log("Token", token);
+//     return token;
+//   }
+
+//   // If the header is missing or has incorrect format, return null or handle the error accordingly
+//   console.log("Token not found in header");
+//   return null;
+// };
+// this is customer Schema                                                                                                                                                                  import Restaurent from "../models/RestaurentUserSchema.js";
+// import Jwt from "jsonwebtoken";
+// import bcrypt from "bcryptjs";
+
+// const restaurentRegister = async (req, res) => {
+//   try {
+//     const {
+//       restaurantName,
+//       email,
+//       address,
+//       password,
+//       openingTime,
+//       closingTime,
+//     } = req.body;
+
+//     //! Check if the restaurant with the given restaurantName already exists
+//     const existingRestaurant = await Restaurent.findOne({ restaurantName });
+//     if (existingRestaurant) {
+//       return res
+//         .status(400)
+//         .json({ error: " Restaurent with this name already exist" });
+//     }
+
+//     // Hash the password before saving it to the database
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     const restaurant = await Restaurent({
+//       restaurantName,
+//       email,
+//       address,
+//       password: hashedPassword,
+//       openingTime,
+//       closingTime,
+//     });
+
+//     await restaurant.save();
+//     res.status(201).json({
+//       restaurantName,
+//       email,
+//       address,
+//       openingTime,
+//       closingTime,
+//       message: "Restaurent Registered successfully!",
+//     });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
+// // ! LOGIN
+// const restaurantLogin = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+
+//     const restaurant = await Restaurent.findOne({ email });
+
+//     if (!restaurant) {
+//       return res
+//         .status(401)
+//         .json({ error: "Invalid restaurant name or password" });
+//     }
+
+//     const passwordMatch = await bcrypt.compare(password, restaurant.password);
+//     if (!passwordMatch) {
+//       return res
+//         .status(401)
+//         .json({ error: "Invalid restaurant name or password" });
+//     }
+
+//     const token = Jwt.sign(
+//       { restaurantId: restaurant._id, role: "restaurantOwner" },
+//       process.env.JWT,
+//       {
+//         expiresIn: "1d",
+//       }
+//     );
+
+//     res.status(200).json({ token, email, restaurantId: restaurant._id });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
+// //! Listing all restaurant for customers
+
+// export const listAllRestaurants = async (req, res) => {
+//   try {
+//     const restaurants = await Restaurent.find({}, { password: 0, email: 0 , role:0, _id:0});
+//     res.status(200).json({
+//       message: "Restaurants successfully Fetched",
+//       restaurants: restaurants,
+//     });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
+// export { restaurentRegister, restaurantLogin };
+// this is restaurant controller                                                                                                                                                             import Jwt from "jsonwebtoken";
+// import Customer from "../models/CustomerUserSchema.js";
+// import bcrypt from "bcryptjs";
+
+// const customerRegister = async (req, res) => {
+//   try {
+//     const { name, phoneNumber, email, password } = req.body;
+
+//     //! Check if the customer with the given email already exists
+//     const existingCustomer = await Customer.findOne({ email });
+//     if (existingCustomer) {
+//       res
+//         .status(401)
+//         .json({ error: "Customer with this email already exists" });
+//     }
+
+//     // Hash the password before saving it to the database
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     const customer = new Customer({ name, email, password : hashedPassword, phoneNumber });
+//     await customer.save();
+
+//     res.status(201).json({ message: "Customer registered successfully" });
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
+// const customerLogin = async (req, res) => {
+//   try {
+
+//     const {email, password} = req.body
+
+//     const customer = await Customer.findOne({email})
+
+//     if(!customer){
+//         return res.status(401).json({ error: 'Invalid email or password' });
+//     }
+    
+//     const passwordMatch = await bcrypt.compare(password, customer.password)
+    
+//     if(!passwordMatch){
+//         return res.status(401).json({ error: 'Invalid email or password' });
+//     }
+
+//     const token = Jwt.sign({ customerId: customer._id, role:"customer" }, process.env.JWT, { expiresIn: '1d' });
+
+//     res.status(200).json({token})
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
+// export { customerRegister, customerLogin };
+// this is customer controller                                                                                                                                                                   Now below code is React with Redux toolkit                                                                                                                                                                                        import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+// import axios from "axios";
+
+// //initialState
+// const customerInitialState = {
+//   error: null,
+//   success: null,
+
+//   loading: false,
+//   customers: [],
+//   customer: null,
+//   profile: {},
+//   customerAuth: {
+//     loading: false, // loading state for authentication
+//     error: null,
+//     customerInfo: localStorage.getItem("customerInfo")
+//       ? JSON.parse(localStorage.getItem("customerInfo"))
+//       : null,
+//   },
+// };
+
+// // Customer Action for Restaurants
+// export const registerCustomerAction = createAsyncThunk(
+//   "customer/register",
+//   async ({ name, email, password,phoneNumber }, { rejectWithValue }) => {
+//     try {
+//       const { data } = await axios.post(
+//         "http://localhost:7000/api/v1/customer/register",
+//         {
+//           name,
+//           email,
+//           password,
+//           phoneNumber
+//         }
+//       );
+//       return data;
+//     } catch (error) {
+//       rejectWithValue(error?.message?.data);
+//     }
+//   }
+// );
+
+// //!
+// export const loginCustomerAction = createAsyncThunk(
+//   "customer/login",
+//   async ({ email, password }, { rejectWithValue }) => {
+//     try {
+//       const { data } = await axios.post(
+//         "http://localhost:7000/api/v1/customer/login",
+//         {
+//           email,
+//           password,
+//         }
+//       );
+//       localStorage.setItem("customerInfo", JSON.stringify(data));
+//       return data;
+//     } catch (error) {
+//       rejectWithValue(error?.message?.data);
+//     }
+//   }
+// );
+
+// //Slice
+// const customerSlice = createSlice({
+//   name: "customer",
+//   initialState: customerInitialState,
+
+//   reducers: {
+//     clearToastNotifications: (state) => {
+//       state.success = null;
+//       state.error = null;
+//     },
+//   },
+//   extraReducers: (builder) => {
+//     //Register
+
+//     builder
+//       .addCase(registerCustomerAction.pending, (state) => {
+//         state.loading = true;
+//       })
+
+//       .addCase(registerCustomerAction.fulfilled, (state, action) => {
+//         state.customerAuth.customerInfo = action.payload;
+//         state.loading = false;
+//       })
+//       .addCase(registerCustomerAction.rejected, (state, action) => {
+//         state.error = action.payload;
+//         state.loading = false;
+//       });
+
+//     //login
+//     builder
+//       .addCase(loginCustomerAction.pending, (state) => {
+//         state.loading = false;
+//       })
+
+//       .addCase(loginCustomerAction.fulfilled, (state, action) => {
+//         state.customerAuth.customerInfo = action.payload;
+//         state.loading = false;
+//       })
+
+//       .addCase(loginCustomerAction.rejected, (state, action) => {
+//         state.error = action.payload;
+//         state.loading = false;
+//       });
+//   },
+// });
+
+
+// const customerReducer = customerSlice.reducer
+
+// export default customerReducer
+// export const { clearToastNotifications } = customerSlice.actions;
+// this is customer slice                                                                                                                                                                      import axios from "axios";
+// import baseURL from "../../../utils/baseURL";
+// import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+
+// //initialState
+
+// const initialRestaurantState = {
+//   loading: false,
+//   error: null,
+//   success: null,
+//   restaurants: [],
+//   restaurant: null,
+//   profile: {},
+//   restaurantAuth: {
+//     loading: false, // loading state for authentication
+//     error: null,
+//     restaurantInfo: localStorage.getItem("restaurantInfo")
+//       ? JSON.parse(localStorage.getItem("restaurantInfo"))
+//       : null,
+//   },
+// };
+
+// // Register Action for Restaurants
+// export const restaurantRegisterAction = createAsyncThunk(
+//   "restaurant/register",
+//   async (
+//     { restaurantName, email, address, password, openingTime, closingTime },
+//     { rejectWithValue }
+//   ) => {
+//     try {
+//       const response = await axios.post(
+//         "http://localhost:7000/api/v1/restaurant/register",
+//         {
+//           restaurantName,
+//           email,
+//           address,
+//           password,
+//           openingTime,
+//           closingTime,
+//         }
+//       );
+      
+//       // Check if response is not in the 2xx range
+//       if (response.status < 200 || response.status >= 300) {
+//         throw new Error(response.data.error);
+//       }
+
+//       return response.data;
+
+//     } catch (error) {
+//       console.log("Axios Error:", error?.response?.data);
+//       return rejectWithValue(error?.response?.data);
+//     }
+//   }
+// );
+
+
+// // ! Login Action for Restaurants
+
+// export const loginRestaurantAction = createAsyncThunk(
+//   "restaurant/login",
+//   async ({ email, password }, { rejectWithValue }) => {
+//     try {
+//       const { data } = await axios.post(`${baseURL}/restaurants/login`, {
+//         email,
+//         password,
+//       });
+//       localStorage.setItem("restaurantInfo", JSON.stringify(data));
+//       return data;
+//     } catch (error) {
+//       rejectWithValue(error?.response?.data);
+//     }
+//   }
+// );
+
+// const restaurantSlice = createSlice({
+//   name: "restaurant",
+//   initialState: initialRestaurantState,
+  
+//   extraReducers: (builder) => {
+//     //Register
+//     builder
+//       .addCase(restaurantRegisterAction.pending, (state) => {
+//         state.loading = true;
+//       })
+
+//       .addCase(restaurantRegisterAction.fulfilled, (state, action) => {
+//         console.log(action.payload);
+//         state.restaurantAuth.restaurantInfo = action.payload;
+//         state.loading = false;
+//         state.success = action.payload?.message;
+
+//         state.error = null;
+//       })
+//       .addCase(restaurantRegisterAction.rejected, (state, action) => {
+//         console.log("Rejected Action Payload:", action.payload);
+//         state.error = action.payload?.error;
+//         state.loading = false;
+//       });
+
+//     //login
+//     builder
+//       .addCase(loginRestaurantAction.pending, (state) => {
+//         state.loading = true;
+//       })
+
+//       .addCase(loginRestaurantAction.fulfilled, (state, action) => {
+//         state.restaurantAuth.restaurantInfo = action.payload;
+//         state.loading = false;
+//         state.success = action.payload?.message;
+
+//         state.error = null;
+//       })
+
+//       .addCase(loginRestaurantAction.rejected, (state, action) => {
+//         state.error = action.payload?.error;
+//         state.loading = false;
+//       });
+//   },
+// });
+
+// const restaurantReducer = restaurantSlice.reducer;
+// export default restaurantReducer;                                                                                                                                                  import { configureStore } from "@reduxjs/toolkit";
+// import restaurantReducer from "../slice/restaurant/restaurantSlice";
+// import customerReducer from "../slice/customers/customerSlice";
+
+// //create a store
+// const store = configureStore({
+//   reducer: {
+//     restaurants: restaurantReducer,
+//     customers: customerReducer,
+//   },
+
+// });
+
+// export default store;
+// this is store                                                                                                                                                                                                import { useEffect, useState } from "react";
+// import { useDispatch, useSelector } from "react-redux";
+// import { restaurantRegisterAction } from "../../redux/slice/restaurant/restaurantSlice";
+// import { toast } from "react-toastify";
+
+// const RestaurantRegister = () => {
+//   const [formData, setFormData] = useState({
+//     restaurantName: "",
+//     email: "",
+//     password: "",
+//     address: "",
+//     openingTime: "",
+//     closingTime: "",
+//   });
+
+//   const dispatch = useDispatch();
+//   const restaurantState = useSelector(state => state.restaurants?.restaurantAuth);
+
+
+
+//   useEffect(() => {
+//     if (restaurantState.error) {
+//       toast.error(restaurantState.error.message);
+//     }
+    
+//     if (restaurantState.restaurantInfo) {
+//         toast.success("Restaurant registration successful!");
+//     }
+// }, [restaurantState]);
+
+
+
+//   const handleSubmit = (e) => {
+//     e.preventDefault();
+//     if (!formData.restaurantName || !formData.email || !formData.password) {
+//       toast.error("Please fill in all required fields.");
+//       return;
+//     }
+//     dispatch(restaurantRegisterAction(formData));
+//   };
+  
+
+//     // setFormData({
+//     //   restaurantName: "",
+//     //   email: "",
+//     //   password: "",
+//     //   address: "",
+//     //   openingTime: "",
+//     //   closingTime: "",
+//     // });
+
+//   return (
+//     <div className="min-h-screen  flex items-center justify-center bg-gradient-to-r from-blue-500 to-slate-500">
+//       <div className="flex flex-col p-8 bg-white rounded-lg shadow-md w-96">
+//         <header className="mb-4">
+//           <h1 className="text-slate-500 font-serif mb-2 flex justify-center text-3xl">
+//             Restaurant Register
+//           </h1>
+//         </header>
+
+//         <form onSubmit={handleSubmit}>
+//           <div className="flex items-center mb-4">
+//             <span className="material-icons text-slate-400 mr-2  w-13 ">
+//               restaurant
+//             </span>
+//             <input
+//               value={formData.restaurantName}
+//               onChange={(e) =>
+//                 setFormData({ ...formData, restaurantName: e.target.value })
+//               }
+//               className="flex-1 rounded px-3 py-2 border border-gray-300"
+//               placeholder="Restaurant Name"
+//             />
+//           </div>
+//           <div className="flex items-center mb-4">
+//             <span className="material-icons text-slate-400 mr-2  w-13 ">
+//               email
+//             </span>
+//             <input
+//               value={formData.email}
+//               onChange={(e) =>
+//                 setFormData({ ...formData, email: e.target.value })
+//               }
+//               className="flex-1 rounded px-3 py-2 border border-gray-300"
+//               placeholder="Email"
+//             />
+//           </div>
+//           <div className="flex items-center mb-4">
+//             <span className="material-icons text-slate-400 mr-2  w-13 ">
+//               lock
+//             </span>
+//             <input
+//               value={formData.password}
+//               onChange={(e) =>
+//                 setFormData({ ...formData, password: e.target.value })
+//               }
+//               className="flex-1 rounded px-3 py-2 border border-gray-300"
+//               placeholder="Password"
+//             />
+//           </div>
+
+//           <div className="flex items-center mb-4">
+//             <span className="material-icons text-slate-400 mr-2 w-13 ">
+//               location
+//             </span>
+//             <input
+//               value={formData.address}
+//               onChange={(e) =>
+//                 setFormData({ ...formData, address: e.target.value })
+//               }
+//               className="flex-1 rounded px-3 py-2 border border-gray-300"
+//               placeholder="Address"
+//             />
+//           </div>
+//           <div className="flex items-center mb-4">
+//             <span className="material-icons text-slate-400 mr-2 w-13 ">
+//               schedule
+//             </span>
+//             <input
+//               value={formData.openingTime}
+//               onChange={(e) =>
+//                 setFormData({ ...formData, openingTime: e.target.value })
+//               }
+//               className="flex-1 rounded px-3 py-2 border border-gray-300"
+//               placeholder="Opening Time"
+//             />
+//           </div>
+//           <div className="flex items-center mb-4">
+//             <span className="material-icons text-slate-400 mr-2" w-13 mt-1>
+//               time
+//             </span>
+//             <input
+//               value={formData.closingTime}
+//               onChange={(e) =>
+//                 setFormData({ ...formData, closingTime: e.target.value })
+//               }
+//               className="flex-1 rounded px-3 py-2 border border-gray-300"
+//               placeholder="Closing Time"
+//             />
+//           </div>
+//           <button type="submit" className="btn">
+//             Restaurant Register
+//           </button>
+//         </form>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default RestaurantRegister;
+// this is Restaurant Register component                                                                                                                                     import { useState } from "react";
+// import { useDispatch } from "react-redux";
+// import { registerCustomerAction } from "../../redux/slice/customers/customerSlice";
+// import { toast } from "react-toastify";
+
+// const CustomerRegister = () => {
+//   const [formData, setFormData] = useState({
+//     name: "",
+//     email: "",
+//     password: "",
+//     phoneNumber: "",
+//   });
+
+//   const dispatch = useDispatch();
+
+//   const handleSubmit = (e) => {
+//     e.preventDefault();
+
+//     if (!formData.name || !formData.email || !formData.password) {
+//       toast.error("Please fill in all required fields."); // This will show a toast immediately
+//       return;
+//     }
+
+//     try {
+//       dispatch(registerCustomerAction(formData));
+//       // Success or error messages will be handled by NotificationMiddlewear
+//       // due to changes in the Redux store
+//     } catch (error) {
+//       // If you catch any unexpected errors here,
+//       // you can handle or display them if needed.
+//     }
+
+//     // Reset the form
+//     setFormData({
+//       name: "",
+//       email: "",
+//       password: "",
+//       phoneNumber: "",
+//     });
+//   };
+
+//   return (
+//     <div className="min-h-screen  flex items-center justify-center bg-gradient-to-r from-blue-500 to-slate-500">
+//       <div className="flex flex-col p-8 bg-white rounded-lg shadow-md w-96">
+//         <header className="mb-4">
+//           <h1 className="text-slate-500 font-serif mb-2 flex justify-center text-3xl">
+//             Customer Register
+//           </h1>
+//         </header>
+//         <form onSubmit={handleSubmit}>
+//           <div className="flex items-center mb-4">
+//             <span className="material-icons text-slate-400 mr-2 w-10">
+//               person
+//             </span>
+//             <input
+//               className="flex-1 rounded px-3 py-2 border border-gray-300"
+//               placeholder="Name"
+//               value={formData.name}
+//               onChange={(e) =>
+//                 setFormData({ ...formData, name: e.target.value })
+//               }
+//             />
+//           </div>
+//           <div className="flex items-center mb-4">
+//             <span className="material-icons text-slate-400 mr-2 w-10">
+//               email
+//             </span>
+//             <input
+//               className="flex-1 rounded px-3 py-2 border border-gray-300"
+//               placeholder="Email"
+//               value={formData.email}
+//               onChange={(e) =>
+//                 setFormData({ ...formData, email: e.target.value })
+//               }
+//             />
+//           </div>
+//           <div className="flex items-center mb-4">
+//             <span className="material-icons text-slate-400 mr-2 w-10">
+//               lock
+//             </span>
+//             <input
+//               className="flex-1 rounded px-3 py-2 border border-gray-300"
+//               placeholder="Password"
+//               value={formData.password}
+//               onChange={(e) =>
+//                 setFormData({ ...formData, password: e.target.value })
+//               }
+//             />
+//           </div>
+
+//           <div className="flex items-center mb-4">
+//             <span className="material-icons text-slate-400 mr-2 w-10">
+//               phone
+//             </span>
+//             <input
+//               className="flex-1 rounded px-3 py-2 border border-gray-300"
+//               placeholder="Phone Number"
+//               value={formData.phoneNumber}
+//               onChange={(e) =>
+//                 setFormData({ ...formData, phoneNumber: e.target.value })
+//               }
+//             />
+//           </div>
+//           <button type="submit" className="btn">
+//             Customer Register
+//           </button>
+//         </form>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default CustomerRegister;
+// this is customer Register component                                                                                                                                          const Login = () => {
+//   return (
+//     <div className="min-h-screen  flex items-center justify-center bg-gradient-to-r from-blue-500 to-slate-500">
+//       <div className="flex flex-col p-8 bg-white rounded-lg shadow-md w-96">
+//         <header className="mb-4">
+//           <h1 className="text-slate-500 font-serif mb-2 flex justify-center text-3xl">
+//             Login
+//           </h1>
+//         </header>
+
+//         <div className="flex items-center mb-4">
+//           <span className="material-icons text-slate-400 mr-2">email</span>
+//           <input
+//             className="flex-1 rounded px-3 py-2 border border-gray-300"
+//             placeholder="Email"
+//           />
+//         </div>
+//         <div className="flex items-center mb-4">
+//           <span className="material-icons text-slate-400 mr-2">lock</span>
+//           <input
+//             className="flex-1 rounded px-3 py-2 border border-gray-300"
+//             placeholder="Password"
+//           />
+//         </div>
+//         <button className="btn">Login</button>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default Login;
+// this is Login component                                                                                                                                                                Now debug the code completely understand it and correct me if i am wrong any where  and When a restaurant owner login  he should land in restaurant dashboard and there will be many restaurant owner so should land in is own restaurant dashboard using is username with id i guess and when a customer login he should land in home page. give me the  complete code structure and explain me step by step so that i can understand. also check is my login slice and action for both restaurant and customer is completely correct or not. and give me the login component complete code after dispatching the action

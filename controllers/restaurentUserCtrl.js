@@ -40,7 +40,7 @@ const restaurentRegister = async (req, res) => {
       address,
       openingTime,
       closingTime,
-      message: "Restaurent saved successfully",
+      message: "Restaurent Registered successfully!",
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -80,6 +80,7 @@ const restaurantLogin = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 //! Listing all restaurant for customers
 

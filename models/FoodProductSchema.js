@@ -39,7 +39,8 @@ const FoodProductSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "RestaurantUser",
       required: false
-    }
+    },
+
   },
   {
     timestamps: true,
