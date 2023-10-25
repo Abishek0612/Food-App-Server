@@ -128,20 +128,20 @@ const deleteFoodItem = async (req, res) => {
       return res.status(400).json({ error: " food product not found " });
     }
 
-     // Check if the food product belongs to the restaurant owner making the request
-    if(foodProduct.restaurant.toString() !==restaurantOwnerId.toString()){
-      return res.status(403).json({ error: "Not authorized to delete this food item" });
+    // Check if the food product belongs to the restaurant owner making the request
+    if (foodProduct.restaurant.toString() !== restaurantOwnerId.toString()) {
+      return res
+        .status(403)
+        .json({ error: "Not authorized to delete this food item" });
     }
 
     // Proceed with the deletion
-    await FoodProduct.findByIdAndDelete(foodProductId)
+    await FoodProduct.findByIdAndDelete(foodProductId);
 
-    res
-      .status(200)
-      .json({
-        message: "Food Item deleted successfully",
-        foodProduct: foodProduct,
-      });
+    res.status(200).json({
+      message: "Food Item deleted successfully",
+      foodProduct: foodProduct,
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -153,18 +153,28 @@ const getAllFoodProductsFromAllRestaurants = async (req, res) => {
   try {
     // Find all food products and populate the restaurant's details
     const foodProducts = await FoodProduct.find().populate({
-      path: 'restaurant',
-      select: 'restaurantName openingTime closingTime address email' 
+      path: "restaurant",
+      select: "restaurantName openingTime closingTime address email",
     });
-    
+
     //Need to Map over the fetched products to add the restaurant's details to the response
-    const responseProducts = foodProducts.map(product => {
+    const responseProducts = foodProducts.map((product) => {
       let productObj = product.toObject(); // Converting mongoose document to plain JavaScript object
-      productObj.restaurantName = product.restaurant ? product.restaurant.restaurantName : "Unknown Restaurant";
-      productObj.openingTime = product.restaurant ? product.restaurant.openingTime : "Unknown";
-      productObj.closingTime = product.restaurant ? product.restaurant.closingTime : "Unknown";
-      productObj.address = product.restaurant ? product.restaurant.address : "Unknown Address";
-      productObj.email = product.restaurant ? product.restaurant.email : "No Email"
+      productObj.restaurantName = product.restaurant
+        ? product.restaurant.restaurantName
+        : "Unknown Restaurant";
+      productObj.openingTime = product.restaurant
+        ? product.restaurant.openingTime
+        : "Unknown";
+      productObj.closingTime = product.restaurant
+        ? product.restaurant.closingTime
+        : "Unknown";
+      productObj.address = product.restaurant
+        ? product.restaurant.address
+        : "Unknown Address";
+      productObj.email = product.restaurant
+        ? product.restaurant.email
+        : "No Email";
 
       return productObj;
     });
@@ -174,15 +184,16 @@ const getAllFoodProductsFromAllRestaurants = async (req, res) => {
       message: "Successfully fetched food items from all restaurants",
       foodProducts: responseProducts,
     });
-
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-
-
- 
-
-
-export { createFoodproduct, getFoodProduct,  getAllFoodProductsFromAllRestaurants, getAllFoodProduct, updateFoodItem , deleteFoodItem};
+export {
+  createFoodproduct,
+  getFoodProduct,
+  getAllFoodProductsFromAllRestaurants,
+  getAllFoodProduct,
+  updateFoodItem,
+  deleteFoodItem,
+};

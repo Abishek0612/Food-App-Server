@@ -75,12 +75,11 @@ const restaurantLogin = async (req, res) => {
       }
     );
 
-    res.status(200).json({ token, email, restaurantId: restaurant._id });
+    res.status(200).json({ token, email, restaurantId: restaurant._id ,  restaurantName: restaurant.restaurantName});
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 //! Listing all restaurant for customers
 

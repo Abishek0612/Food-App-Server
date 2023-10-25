@@ -17,7 +17,12 @@ const customerRegister = async (req, res) => {
     // Hash the password before saving it to the database
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const customer = new Customer({ name, email, password : hashedPassword, phoneNumber });
+    const customer = new Customer({
+      name,
+      email,
+      password: hashedPassword,
+      phoneNumber,
+    }); 
     await customer.save();
 
     res.status(201).json({ message: "Customer registered successfully" });
@@ -28,24 +33,39 @@ const customerRegister = async (req, res) => {
 
 const customerLogin = async (req, res) => {
   try {
+    const { email: inputEmail, password } = req.body;
 
-    const {email, password} = req.body
+    const customer = await Customer.findOne({ email: inputEmail }); // Use the renamed variable here
 
-    const customer = await Customer.findOne({email})
-
-    if(!customer){
-        return res.status(401).json({ error: 'Invalid email or password' });
-    }
-    
-    const passwordMatch = await bcrypt.compare(password, customer.password)
-    
-    if(!passwordMatch){
-        return res.status(401).json({ error: 'Invalid email or password' });
+    if (!customer) {
+      return res.status(401).json({ error: "Invalid email or password" });
     }
 
-    const token = Jwt.sign({ customerId: customer._id, role:"customer" }, process.env.JWT, { expiresIn: '1d' });
+    const passwordMatch = await bcrypt.compare(password, customer.password);
 
-    res.status(200).json({token})
+    if (!passwordMatch) {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
+
+    const token = Jwt.sign(
+      { customerId: customer._id, role: "customer" },
+      process.env.JWT,
+      { expiresIn: "1d" }
+    );
+
+    // Extracting required customer fields
+    const { _id, name, email, phoneNumber } = customer;
+
+    // Sending required fields along with the token
+    res.status(200).json({
+      token,
+      customer: {
+        _id,
+        name,
+        email,
+        phoneNumber,
+      },
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

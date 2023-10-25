@@ -3,9 +3,15 @@ import Order from "../models/OrderSchema.js";
 
 const createOrder = async (req, res) => {
   try {
-    const { customer, restaurant, items, shippingAddress, paymentMethod } =
-      req.body;
+    const { restaurant, items, shippingAddress, paymentMethod } = req.body;
 
+    // Fetch customer details using customer ID from middleware
+    const customerDetails = await Customer.findById(req.user._id);
+    if (!customerDetails) {
+      return res.status(404).json({ error: "Customer not found." });
+    }
+
+    // Calculate total price
     let totalPrice = 0;
 
     const foodItems = await Promise.all(
@@ -21,11 +27,10 @@ const createOrder = async (req, res) => {
         }
 
         // Update the total sold and total quantity for the food item
-
         food.totalSold += item.quantity;
         food.totalQty -= item.quantity; // Decrease the totalQty
 
-        const itemTotal = food.price + item.quantity;
+        const itemTotal = food.price * item.quantity; // Fixed multiplication instead of addition
         totalPrice += itemTotal;
 
         await food.save();
@@ -38,10 +43,13 @@ const createOrder = async (req, res) => {
     );
 
     const order = new Order({
-      customer,
+      customer: customerDetails._id, // Use the customer ID from customerDetails
       restaurant,
       items: foodItems,
-      shippingAddress,
+      shippingAddress: {
+        ...shippingAddress,
+        name: customerDetails.name, // Optionally use the name from customerDetails
+      },
       totalPrice,
       paymentMethod,
     });
@@ -56,6 +64,7 @@ const createOrder = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 const getOrders = async (req, res) => {
   try {
@@ -72,26 +81,24 @@ const getOrders = async (req, res) => {
   }
 };
 
-
+// Update Order Status:
 const updateOrderStatus = async (req, res) => {
-
   try {
     const { orderId } = req.params;
     const { status } = req.body;
 
-    const order = await Order.findById({orderId})
+    const order = await Order.findById(orderId) // Corrected this line
     if (!order) {
       return res.status(404).json({ error: "Order not found." });
-  }
+    }
 
-  order.orderStatus= status
-  await order.save();
+    order.orderStatus= status;
+    await order.save();
 
-        res.status(200).json({ message: "Order status updated successfully.", order });
-  }catch (error) {
+    res.status(200).json({ message: "Order status updated successfully.", order });
+  } catch (error) {
     res.status(500).json({ error: error.message });
+  }
 }
-}
-
 
 export { createOrder, getOrders, updateOrderStatus };
