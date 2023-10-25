@@ -49,3 +49,7 @@ RestaurentUserCtrl: Handles restaurant registration, login, and listing all rest
 restaurantFoodProduct: Manages CRUD operations for food items.
 orderCtrl: Manages the creation, retrieval, and update of orders.
 customerUserCtrl: Handles customer registration and login.
+
+
+
+To run the server :  npm start
